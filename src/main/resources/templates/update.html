@@ -1,0 +1,206 @@
+﻿<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-Ua-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="format-detection" content="telephone=no">
+        <link rel="icon" href="/images/login.jpg">
+        <title>维护投票</title>
+        <link href="/css/style.css" rel="stylesheet" type="text/css">
+        <script type="text/javascript" th:src="@{/js/jquery-3.3.1.min.js}"></script>
+        <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all"/>
+        <script type="text/javascript" th:src="@{/layui/layui.js}"></script>
+    </head>
+    <body class="body">
+        <div class="wrap" style="background-color: white;min-height: 720px;">
+            <th:block th:include="top.html"/>
+            <div class="box" id="voteManage" style="height: 520px;">
+                <H2>添加新投票</H2>
+                <div class="content">
+                    <form class="layui-form" id="dataFrm">
+                        <div class="layui-form-item">
+                            <div class="layui-block">
+                                <label class="layui-form-label">投票内容</label>
+                                <div class="layui-input-block">
+                                    <input type="hidden" name="sid" id="sid"/>
+                                    <input type="text" name="title" id="title" readonly lay-verify="required"
+                                           autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">投票类型</label>
+                                <div class="layui-input-inline">
+                                    <input type="radio" name="type" value="1" title="单选" id="dan">
+                                    <input type="radio" name="type" value="0" title="多选" id="duo">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="options">
+                            <div class="layui-form-item">
+                                <div class="layui-block">
+                                    <label class="layui-form-label">投票选项</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="ocontent" lay-verify="required" autocomplete="off"
+                                               class="layui-input">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <div class="layui-form-item" style="text-align: center;">
+                                <div>
+                                    <button type="button"
+                                            class="layui-btn layui-btn-normal layui-btn-sm layui-icon layui-icon-release"
+                                            lay-filter="doSubmit" lay-submit="">确认维护
+                                    </button>
+                                    <button type="button" id="addOption"
+                                            class="layui-btn layui-btn-sm layui-icon layui-icon-add-1">
+                                        新增选项
+                                    </button>
+                                    <button type="button" id="cancel"
+                                            class="layui-btn layui-btn-primary layui-btn-sm layui-icon layui-icon-refresh">
+                                        取消操作
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="wrap" id="footer"> 北大青鸟 © 版权所有</div>
+        </div>
+        <script type="text/javascript">
+            var optionCount = 0;
+
+            //返回?后的json对象
+            function getRequest() {
+                //获取url中"?"符后的字串
+                var url = location.search;
+                var theRequest = new Object();
+                if (url.indexOf("?") !== -1) {
+                    var str = url.substr(1);
+                    var strs = str.split("&");
+                    for (var i = 0; i < strs.length; i++) {
+                        theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+                    }
+                }
+                return theRequest;
+            }
+
+            $(function () {
+                layui.use(['jquery', 'layer', 'form'], function () {
+                    var $ = layui.jquery;
+                    var layer = layui.layer;
+                    var form = layui.form;
+                    var v = getRequest();
+                    $.post('/subject/queryVote', v, function (result) {
+                        var map = result.map;
+                        var options = result.options;
+                        $("#title").val(map.title);
+                        $("#sid").val(map.sid);
+                        if (map.type === 1) {
+                            $("#dan").attr("checked",true)
+                        } else {
+                            $("#duo").attr("checked",true);
+                        }
+                        form.render('radio');
+                        var option = '';
+                        $.each(options, function (index, item) {
+                            optionCount++;
+                            option += '<div class="layui-form-item">' +
+                                '<div class="layui-block">' +
+                                '    <label class="layui-form-label">投票选项</label>' +
+                                '    <div class="layui-input-inline" id="options">' +
+                                '        <input type="text" name="ocontent" lay-verify="required" value="' + item.ocontent + '" autocomplete="off" class="layui-input">' +
+                                '        <input type="hidden" name="oid" value="' + item.oid + '"/>' +
+                                '    </div>' +
+                                '</div>' +
+                                '</div>';
+                            $("#options").html(option);
+                        });
+                       
+                    })
+                })
+            });
+            layui.use(['jquery', 'layer', 'form'], function () {
+                var $ = layui.jquery;
+                var layer = layui.layer;
+                var form = layui.form;
+                form.on("submit(doSubmit)", function (obj) {
+                    var flag = 1;  // 1为校验通过，0为校验失败
+                    var arr = [];  // 存放值得数组
+                    var input = $("input[name='ocontent']");  // 存放输入框对象
+                    $.each(input, function (i) {
+                        arr.push(input.eq(i).val())
+                    });
+                    input.removeClass("layui-form-danger");  // 取消所有校验状态
+                    for (var i = 0; i < arr.length; i++) {
+                        for (var j = i + 1; j < arr.length; j++) {
+                            if (arr[j] === arr[i]) {
+                                input.eq(i).addClass("layui-form-danger");
+                                input.eq(j).addClass("layui-form-danger");
+                                input.eq(j).focus()
+                                flag = 0;
+                            }
+                        }
+                    }
+                    if (flag !== 0) {
+                        //序列化表单数据
+                        var params = $("#dataFrm").serialize();
+                        $.post('/subject/updateSubject', params, function (result) {
+                            if (result.result === 'success') {
+                                layer.alert('修改投票成功', {icon: 1});
+                                setTimeout("location.href='/toVoteList'", 1500)
+
+                            } else {
+                                layer.alert('修改投票失败', {icon: 2});
+                            }
+                        })
+                    } else {
+                        layer.msg('投票选项不能相同', {icon: 2});
+                    }
+                });
+                $("#addOption").on('click', function () {
+                    if (optionCount < 5) {
+                        var option = '<div class="layui-form-item">' +
+                            '<div class="layui-block">' +
+                            '    <label class="layui-form-label">投票选项</label>' +
+                            '    <div class="layui-input-inline" id="options">' +
+                            '        <input type="text" name="ocontent" lay-verify="required" autocomplete="off" class="layui-input">' +
+
+                            '    </div>' +
+                            '    <a style="line-height: 41px" onclick="removeOption($(this))">删除选项</a>' +
+                            '</div>' +
+                            '</div>';
+                        $("#options").append(option);
+                        optionCount++;
+                    } else {
+                        layer.alert('每个投票主题最多五个投票选项', {icon: 2, title: '温馨提示'});
+                    }
+                });
+                $("#cancel").on('click', function () {
+                    layer.confirm('确定要取消操作吗?', {icon: 3, title: '温馨提示'}, function (index) {
+                        layer.close(index);
+                        window.location.href = '/toVoteList';
+                    });
+                })
+            });
+
+            function removeOption(obj) {
+                layui.use(['layer'], function () {
+                    var layer = layui.layer;
+                    layer.confirm('确定要删除该选项吗?', {icon: 3, title: '温馨提示'}, function (index) {
+                        layer.close(index);
+                        obj.parent().parent().remove();
+                        optionCount--;
+                    })
+                })
+            }
+        </script>
+    </body>
+</html>

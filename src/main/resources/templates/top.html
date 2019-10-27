@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <div class="wrap" id="header"><IMG src="/images/logo.gif"> </div>
+        <div class="wrap" id="navbar">
+            <div class="profile">
+                您好，<span th:text="${session.user.username}"></span>
+                <span class="return"><a href="/toVoteList">返回列表</a></span>
+                <span class="addnew" th:if="${session.user.isAdmin==0}"><a href="/toAdd">添加新投票</a></span>
+                <span class="return"><a onclick="loginOut()">注销</a></span>
+            </div>
+        </div>
+        <script type="text/javascript">
+            function loginOut() {
+                layui.use(['form', 'layer', 'jquery'], function () {
+                    var form = layui.form;
+                    var layer = layui.layer ;
+                    var  $ = layui.jquery;
+                    layer.confirm('确定要注销吗?',{icon:3,title:'温馨提示'},function (index) {
+                        var id=[[${session.user.userId}]];
+                        $.post('/login/loginOut',{'userId':id},function (result) {
+                            if (result.result === 'success') {
+                                layer.msg('注销成功', {icon: 1});
+                                layer.close(index);
+                                setTimeout("window.location.href='/toLogin'", 1500);
+                            } else if (result.result === 'failure') {
+                                layer.msg('注销失败！', {icon: 2, time: 1200});
+                            }
+                        })
+                    });
+
+                });
+
+            }
+        </script>
+    </body>
+</html>

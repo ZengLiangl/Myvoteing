@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.voting.dao.ItemMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.voting.pojo.Item">
+        <id column="vid" property="vid" />
+        <result column="uid" property="uid" />
+        <result column="sid" property="sid" />
+        <result column="oid" property="oid" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        vid, uid, sid, oid
+    </sql>
+    <select id="queryItemStatistical" parameterType="Integer" resultType="map">
+        SELECT o.ocontent,COUNT(i.vid) AS 'itemCount',o.oid AS 'oid'
+        FROM `options` o
+        LEFT JOIN item i
+        ON (i.oid=o.oid)
+        WHERE o.osid=#{sid}
+        GROUP BY o.oid
+    </select>
+</mapper>

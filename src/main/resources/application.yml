@@ -1,0 +1,49 @@
+server:
+  port: 8888 #端口设置
+spring:
+  datasource:
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1:3306/myvoting?useUnicode=true&characterEncoding=utf8&useSSL=true&serverTimezone=UTC
+      username: root
+      password: 123
+      max-wait: 50000
+      max-active: 20
+      initial-size: 1
+      filter: stat,log4j,wall
+      enable: true
+      validationQuery: SELECT 'x'   #验证连接
+      #配置监控页面
+      stat-view-servlet:
+        login-username: root
+        login-password: 123456
+        enabled: true
+        deny:
+        allow:
+        url-pattern: /druid/*
+  mvc:
+    date-format: yyyy-MM-dd HH:mm:ss
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  #thymeleaf配置
+  thymeleaf:
+    enabled: true
+    cache: false #取消缓存
+  #配置mybatis-plus
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: mapper/**/*Mapper.xml
+  global-config:
+    db-config:
+      id-type: auto
+  type-aliases-package: com.voting.pojo 
+
+#pagehelper分页插件配置
+pagehelper:
+  helperDialect: mysql #设置sql语言
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+  pageSizeZero: true

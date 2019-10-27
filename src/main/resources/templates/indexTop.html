@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en"  xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <div class="wrap" id="header"><IMG src="/images/logo.gif"> </div>
+        <div class="wrap" id="navbar">
+            <div class="profile">您好，<span th:text="${session.user.username}"></span>
+                <span class="return"><a href="">返回列表</a></span>
+                <span class="addnew"><a href="/toAdd">添加新投票</a></span>
+                <span class="modify"><a href="">维护</a></span>
+                <span class="return"><a onclick="loginOut()">注销</a></span>
+            </div>
+            
+        </div>
+    </body>
+</html>

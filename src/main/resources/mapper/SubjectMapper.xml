@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.voting.dao.SubjectMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.voting.pojo.Subject">
+        <id column="sid" property="sid" />
+        <result column="title" property="title" />
+        <result column="type" property="type" />
+        <result column="createTime" property="createTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        sid, title, type, createTime
+    </sql>
+    <select id="queryAllSubjectInfo" parameterType="Subject" resultType="map">
+        SELECT s.sid,s.title,COUNT(DISTINCT o.oid) AS 'options',COUNT(DISTINCT i.vid) AS 'items',s.type
+        FROM `subject` s
+        LEFT JOIN `options` o ON s.sid=o.osid
+        LEFT JOIN item i ON s.sid=i.sid
+        <where>
+            <if test="title!=null and title!=''">
+                and s.title like CONCAT('%',#{title},'%')
+            </if>
+            <if test="sid!=null">
+                and s.sid=#{sid}
+            </if>
+        </where>
+        GROUP BY createTime DESC 
+    </select>
+</mapper>

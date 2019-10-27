@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html >
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-Ua-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="format-detection" content="telephone=no">
+        <title>投票列表</title>
+        <link rel="icon" href="/images/login.jpg">
+        <link href="/css/style.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all"/>
+        <script type="text/javascript" th:src="@{/layui/layui.js}"></script>
+        <style rel="stylesheet">
+
+        </style>
+    </head>
+    <body class="body">
+        <div class="wrap" style="background-color: white;min-height: 720px;">
+            <th:block th:include="top.html"/>
+            <div class="wrap" id="vote" style="height: 520px;">
+                <div class="search">
+                    <fieldset class="layui-elem-field site-demo-butto" style="margin-top: 20px;">
+                        <legend>查询条件</legend>
+                        <form method="post" id="searchForm">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">投票主题</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="title" lay-verify="title" autocomplete="off"
+                                           placeholder="请输入标题" class="layui-input">
+                                </div>
+                                <div class="layui-inline">
+                                    <button type="button" id="doSearch"
+                                            class="layui-btn layui-btn-normal  layui-icon layui-icon-search">查询
+                                    </button>
+                                    <button type="reset" class="layui-btn layui-btn-warm layui-icon layui-icon-refresh">
+                                        重置
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </fieldset>
+                </div>
+                <h2>投票列表</h2>
+                <div style="float: right;">
+
+                </div>
+                <br>
+                <ul class="list" id="subjectList" style="height: 346px;">
+                    <li>
+                        <H4>
+                            <a href="">哪个浏览器好用</a>
+                        </H4>
+                        <div class="join">
+                            <a href="">我要参与</a>
+                        </div>
+                        <P class="info">共有 4 个选项，已有15个投票。</P>
+                    </li>
+                </ul>
+                <div id="fenye" style="text-align: center;"></div>
+            </div>
+            <div class="wrap" id="footer"> 北大青鸟 © 版权所有</div>
+        </div>
+        <div style="display: none" id="saveItem">
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                <legend id="title">就业意向城市</legend>
+            </fieldset>
+            <P class="info" style="float: right">共有 <span id="options">4</span> 个选项，已有 <span id="items">9</span> 个投票。</P>
+            <form method="post" class="layui-form layui-form-pane" style="margin: auto" id="optionForm">
+                <div id="optionsDiv">
+                    <div class="layui-form-item" >
+                        <div class="layui-inline">
+                            <label class="layui-form-label">选项1：</label>
+                            <div class="layui-input-inline">
+                                <input type="radio" name="type" value="1" title="长沙" checked="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              
+                <div class="layui-form-item">
+                    <div class="layui-form-item" style="text-align: center;">
+                        <div>
+                            <button type="button"
+                                    class="layui-btn layui-btn-normal layui-btn-sm layui-icon layui-icon-release"
+                                    lay-filter="doSubmit" lay-submit="">提交
+                            </button>
+                            <button type="reset" id="dataFrmResetBtn"
+                                    class="layui-btn layui-btn-warm layui-btn-sm layui-icon layui-icon-refresh">重置
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </body>
+    <script type="text/javascript" th:src="@{/js/jquery-3.3.1.min.js}"></script>
+    <script type="text/javascript">
+        $(function () {
+            var params = $("#searchForm").serialize();
+            loadSubjectInfo(params, 1, 5)
+            $("#doSearch").click(function () {
+                var params = $("#searchForm").serialize();
+                //alert(params);
+                loadSubjectInfo(params, 1, 5)
+            })
+        });
+
+        function loadSubjectInfo(params, pageNo, pageSize) {
+            $.post('/subject/queryAllSubjectInfo?curr=' + pageNo + '&page=' + pageSize, params,
+                function (result) {
+                    var items = '';
+                    $.each(result.list, function (index, item) {
+                        var str = '';
+                        if (index % 2 === 0) {
+                            str = '<li class="odd">'
+                        } else {
+                            str = '<li>'
+                        }
+                        items += str +
+                            '<H4>' +
+                            '<a onclick="isHaveItem(' + item.sid + ')">' + item.title + '</a>' +
+                            '</H4>' +
+                            '<div class="join">' +
+                            ' <button type="button" onclick="isHaveItem(' + item.sid + ')" class="layui-btn layui-icon layui-icon-praise   layui-btn-sm">我要参与</button>' +
+                            '<button type="button" onclick="updateOption(' + item.sid + ')" th:if="[[${session.user.isAdmin==0}]]" class="layui-btn layui-icon layui-icon-edit layui-btn-normal layui-btn-sm">维护</button>' +
+                            '</div>' +
+                            '<P class="info">共有 ' + item.options + ' 个选项，已有' + item.items + '个投票。</P>' +
+                            '</li>';
+                    });
+                    $("#subjectList").html(items);
+                    layui.use(['laypage'], function () {
+                        var laypage = layui.laypage;
+                        laypage.render({
+                            elem: 'fenye',
+                            count: result.total,
+                            limit: result.pageSize,
+                            theme: "#FF5722",
+                            curr: result.pageNum,
+                            // 自定义排版
+                            layout: ['count', 'prev', 'page', 'next'],
+                            groups: 1,
+                            jump: function (obj, first) {
+                                //首次不执行
+                                if (!first) {
+                                    var params = $("#searchForm").serialize();
+                                    loadSubjectInfo(params, obj.curr, obj.limit);
+                                }
+                            }
+                        })
+                    })
+                })
+        }
+
+        function isHaveItem(sid) {
+            var index;
+            layui.use(['jquery', 'layer', 'form'], function () {
+                var $ = layui.jquery;
+                var layer = layui.layer;
+                var form = layui.form;
+                $.post('/subject/isHaveItem', {'sid': sid}, function (result) {
+                    if (result.result === 'success') {
+                        location.href = '/toVoteView?sid=' + sid
+                    } else {
+                        // location.href='/toVote?sid='+sid
+                        index = layer.open({
+                            type: 1,
+                            title: '参与投票',
+                            content: $("#saveItem"),
+                            area: ['600px', '500px'],
+                            resize: false,
+                            success: function (index) {
+                                $.post("/subject/queryVote", {'sid':sid}, function (result) {
+                                    $("#title").text(result.map.title);
+                                    $("#options").text(result.map.options);
+                                    $("#items").text(result.map.items);
+                                    var type = '';
+                                    if (result.map.type === 1) {
+                                        type = 'radio';
+                                    } else {
+                                        type = 'checkbox';
+                                    }
+                                    var options = '';
+                                    $.each(result.options, function (index, item) {
+                                        options += 
+                                            '<div class="layui-form-item" pane="">' +
+                                            '   <div class="layui-inline">' +
+                                            '       <label class="layui-form-label">选项'+(index+1)+'：</label>' +
+                                            '       <div class="layui-input-inline">' +
+                                            '           <input type="'+type+'" name="oid" lay-verify="required" value="'+item.oid+'" title="'+item.ocontent+'">' +
+                                            '       </div>' +
+                                            '   </div>' +
+                                            '</div>';
+                                    })
+                                    $("#optionsDiv").html(options).append(' <input type="hidden" name="sid" value="'+sid+'">');
+                                    form.render()
+                                });
+                            }
+                        });
+                    }
+                })
+                //保存
+                form.on("submit(doSubmit)", function (obj) {
+                    var item=$("input:checked").length;
+                    if (item>0){
+                        //序列化表单数据
+                        var optionForm = $("#optionForm").serialize();
+                        $.post('/subject/saveItem', optionForm, function (result) {
+                            if (result.result === 'success') {
+                                layer.alert('投票成功', {icon: 1});
+                                var params = $("#searchForm").serialize();
+                                //alert(params);
+                                loadSubjectInfo(params, 1, 5)
+                                //关闭弹出层
+                                layer.close(index);
+                            } else {
+                                layer.alert('投票失败', {icon: 2});
+                            }
+                        })
+                    } else {
+                        layer.alert('请选择选项投票', {icon: 2});
+                    }
+                   
+                });
+            });
+        }
+        function updateOption(sid) {
+            location.href='/toUpdate?sid='+sid
+        }
+    </script>
+</html>
