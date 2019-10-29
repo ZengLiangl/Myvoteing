@@ -103,7 +103,6 @@
             loadSubjectInfo(params, 1, 5)
             $("#doSearch").click(function () {
                 var params = $("#searchForm").serialize();
-                //alert(params);
                 loadSubjectInfo(params, 1, 5)
             })
         });
@@ -119,13 +118,19 @@
                         } else {
                             str = '<li>'
                         }
+                        var isAdmin=[[${session.user.isAdmin}]];
+                        var type='';
+                        if (isAdmin==0){
+                            type= ' <button type="button" onclick="isHaveItem(' + item.sid + ')" class="layui-btn layui-icon layui-icon-praise   layui-btn-sm">我要参与</button>' +
+                                '<button type="button" onclick="updateOption(' + item.sid + ')" th:if="[[${session.user.isAdmin==0}]]" class="layui-btn layui-icon layui-icon-edit layui-btn-normal layui-btn-sm">维护</button>' ;
+                        }else {
+                            type= ' <button type="button" onclick="isHaveItem(' + item.sid + ')" class="layui-btn layui-icon layui-icon-praise   layui-btn-sm">我要参与</button>' ;
+                        }
                         items += str +
                             '<H4>' +
                             '<a onclick="isHaveItem(' + item.sid + ')">' + item.title + '</a>' +
                             '</H4>' +
-                            '<div class="join">' +
-                            ' <button type="button" onclick="isHaveItem(' + item.sid + ')" class="layui-btn layui-icon layui-icon-praise   layui-btn-sm">我要参与</button>' +
-                            '<button type="button" onclick="updateOption(' + item.sid + ')" th:if="[[${session.user.isAdmin==0}]]" class="layui-btn layui-icon layui-icon-edit layui-btn-normal layui-btn-sm">维护</button>' +
+                            '<div class="join">' +type+
                             '</div>' +
                             '<P class="info">共有 ' + item.options + ' 个选项，已有' + item.items + '个投票。</P>' +
                             '</li>';
