@@ -25,7 +25,6 @@ public class WebConfig {
      * 注册listener
      */
     public ServletListenerRegistrationBean<SessionListener> servletContextListener(SessionListener sessionListener){
-        
         ServletListenerRegistrationBean<SessionListener> servletListenerRegistrationBean=new ServletListenerRegistrationBean<>();
         //注入监听器
         servletListenerRegistrationBean.setListener(sessionListener);
